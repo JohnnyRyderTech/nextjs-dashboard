@@ -23,7 +23,16 @@ const links = [
 
 export default function NavLinks() {
   const pathname = usePathname();
+  return <LinkList pathname={pathname} />;
+}
 
+// Shown while the current URL is not known yet (PPR prerender of dynamic
+// routes such as /dashboard/invoices/[id]/edit). Same links, no highlight.
+export function NavLinksFallback() {
+  return <LinkList pathname={null} />;
+}
+
+function LinkList({ pathname }: { pathname: string | null }) {
   return (
     <>
       {links.map((link) => {
