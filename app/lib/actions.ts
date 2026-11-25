@@ -30,12 +30,21 @@ export async function createInvoice(formData: FormData) {
   const amountInCents = Math.round(amount * 100);
   const date = new Date().toISOString().split('T')[0];
 
-  await sql`
-    INSERT INTO invoices (customer_id, amount, status, date)
-    VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-  `;
+  try {
+    await sql`
+      INSERT INTO invoices (customer_id, amount, status, date)
+      VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+    `;
+  } catch (error) {
+    // If a database error occurs, throw a more specific error.
+    console.error(error);
+    // Shown by error.tsx. (Chapter 14 changes this to return a message
+    // to the form with useActionState instead.)
+    throw new Error('Database Error: Failed to Create Invoice.');
+  }
 
   // Clear the cached invoices page and send the user back to it.
+  // redirect() works by throwing, so it must stay outside try/catch.
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 }
@@ -48,17 +57,30 @@ export async function updateInvoice(id: string, formData: FormData) {
   });
   const amountInCents = Math.round(amount * 100);
 
-  await sql`
-    UPDATE invoices
-    SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-    WHERE id = ${id}
-  `;
+  try {
+    await sql`
+      UPDATE invoices
+      SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+      WHERE id = ${id}
+    `;
+  } catch (error) {
+    console.error(error);
+    // Shown by error.tsx. (Chapter 14 changes this to return a message
+    // to the form with useActionState instead.)
+    throw new Error('Database Error: Failed to Update Invoice.');
+  }
 
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 }
 
 export async function deleteInvoice(id: string) {
-  await sql`DELETE FROM invoices WHERE id = ${id}`;
+  try {
+    await sql`DELETE FROM invoices WHERE id = ${id}`;
+  } catch (error) {
+    console.error(error);
+    // Re-throw so the error.tsx boundary shows a friendly error page.
+    throw new Error('Database Error: Failed to Delete Invoice.');
+  }
   revalidatePath('/dashboard/invoices');
 }
