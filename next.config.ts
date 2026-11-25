@@ -1,7 +1,10 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Partial Prerendering (PPR). In Next.js 14-15 the course enabled this with
+  // `experimental: { ppr: 'incremental' }` and `export const experimental_ppr = true`
+  // in the dashboard layout. In Next.js 16 PPR is enabled with `cacheComponents`.
+  cacheComponents: true,
 };
 
 export default nextConfig;

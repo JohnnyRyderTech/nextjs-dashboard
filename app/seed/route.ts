@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import postgres from 'postgres';
+import { connection } from 'next/server';
 import { invoices, customers, revenue, users } from '../lib/placeholder-data';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
@@ -102,6 +103,8 @@ async function seedRevenue() {
 }
 
 export async function GET() {
+  // Always run at request time, never during the build (cacheComponents / PPR).
+  await connection();
   try {
     // Run the seed steps one after another. Running them in parallel can fail,
     // because each step tries to create the "uuid-ossp" extension at the same time.

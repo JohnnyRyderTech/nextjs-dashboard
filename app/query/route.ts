@@ -1,4 +1,5 @@
 import postgres from 'postgres';
+import { connection } from 'next/server';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -14,6 +15,8 @@ async function listInvoices() {
 }
 
 export async function GET() {
+  // Always run at request time, never during the build (cacheComponents / PPR).
+  await connection();
   try {
     return Response.json(await listInvoices());
   } catch (error) {
